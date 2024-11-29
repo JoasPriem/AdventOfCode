@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Runtime.CompilerServices;
 
-double getDecimalValue(char chr)
+double MapSnafuToDecimalDigit(char chr)
 {
     switch (chr)
     {
@@ -19,6 +19,24 @@ double getDecimalValue(char chr)
             throw new NotImplementedException();
     }
 }
+string MapDecimalToSnafuDigit(int value)
+{
+    switch (value)
+    {
+        case 2:
+            return "2";
+        case 1:
+            return "1";
+        case 0:
+            return "0";
+        case -1:
+            return "-";
+        case -2:
+            return "=";
+        default:
+            throw new NotImplementedException();
+    }
+}
 
 double GetDecimalValue(string snafu)
 {
@@ -27,7 +45,7 @@ double GetDecimalValue(string snafu)
 
     for (int i = 0; i < reversedLine.Count(); i++)
     {
-        numberInDecimal += Math.Pow(5, i) * getDecimalValue(reversedLine.ElementAt(i));
+        numberInDecimal += Math.Pow(5, i) * MapSnafuToDecimalDigit(reversedLine.ElementAt(i));
     }
     return numberInDecimal;
 }
@@ -35,11 +53,62 @@ double GetDecimalValue(string snafu)
 double totalSum = 0;
 while (Console.ReadLine() is { } line)
 {
-
     totalSum += GetDecimalValue(line); ;
 }
 
+string GetSnafuValue(double number)
+{
+    string snafu = "";
+    int length = CalculateMaxSnafuLength(number);
+    
+    snafu += GetSnafuDigetAt(number, length - 1);
+    return snafu;
+}
+
+int CalculateMaxSnafuLength(double number)
+{
+    int index = 0;
+    double maxValue = 2 * Math.Pow(5, index);
+
+    while (maxValue < number)
+    {
+        index++;
+        maxValue += 2 * Math.Pow(5, index);
+    }
+
+    return index + 1;
+}
+
+string GetSnafuDigetAt(double number, int index)
+{
+    if (index == 0)
+    {
+        return MapDecimalToSnafuDigit((int)number);
+    }
+
+    double bestResidualNumber = double.MaxValue;
+    int selectedModifier = 0;
+
+    for (int i = -2; i <= 2; i++)
+    {
+        double residualNumber = number - Math.Pow(5, index) * i;
+
+        if (Math.Abs(residualNumber) < Math.Abs(bestResidualNumber))
+        {
+            bestResidualNumber = residualNumber;
+            selectedModifier = i;
+        }
+    }
+
+    return MapDecimalToSnafuDigit(selectedModifier) + GetSnafuDigetAt(bestResidualNumber, index - 1);
 
 
-Console.WriteLine(totalSum);
-await Task.Delay(5000);
+}
+
+Console.WriteLine(GetSnafuValue(totalSum));
+
+
+
+
+
+await Task.Delay(500440);
